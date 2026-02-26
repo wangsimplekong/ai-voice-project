@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ==================== 父工程 ==================== -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.4</version>
+        <relativePath/>
+    </parent>
+
+    <!-- ==================== 项目坐标 ==================== -->
+    <groupId>com.ai</groupId>
+    <artifactId>ai-voice-project</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>ai-voice-project</name>
+    <description>AI 语音项目：父工程，聚合语音中转服务与模型部署脚本</description>
+
+    <!-- ==================== 统一版本号 ==================== -->
+    <properties>
+        <!-- 基础环境 -->
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+
+        <!-- 接口文档 -->
+        <knife4j.version>4.5.0</knife4j.version>
+
+        <!-- HTTP / JSON -->
+        <fastjson.version>1.2.47</fastjson.version>
+
+        <!-- 语音相关 SDK -->
+        <dashscope-sdk.version>2.22.5</dashscope-sdk.version>
+    </properties>
+
+    <!-- ==================== 依赖版本管理 ==================== -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- ~~~~~ 1. 接口文档（Knife4j） ~~~~~ -->
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+                <version>${knife4j.version}</version>
+            </dependency>
+
+            <!-- ~~~~~ 2. HTTP / JSON ~~~~~ -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+
+            <!-- ~~~~~ 3. 百炼 DashScope（ASR / TTS） ~~~~~ -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>dashscope-sdk-java</artifactId>
+                <version>${dashscope-sdk.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- ==================== Maven 仓库 ==================== -->
+    <repositories>
+        <!-- Maven 中央仓库 -->
+        <repository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+        <!-- Spring 里程碑版本仓库（Spring AI 等预发布依赖） -->
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- Sonatype OSS（第三方开源库） -->
+        <repository>
+            <id>sonatype-oss</id>
+            <url>https://oss.sonatype.org/content/repositories/releases</url>
+        </repository>
+    </repositories>
+
+    <!-- ==================== 构建配置 ==================== -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Java 编译插件 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>UTF-8</encoding>
+                        <compilerArgs>
+                            <arg>-J-Dfile.encoding=UTF-8</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+                <!-- Spring Boot 打包插件 -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+                <!-- 单元测试插件 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <!-- 关闭 Spring Cloud 版本兼容性校验 -->
+                            <spring.cloud.compatibility-verifier.enabled>false
+                            </spring.cloud.compatibility-verifier.enabled>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <!-- ==================== 子模块 ==================== -->
+    <modules>
+        <!-- 语音中转服务：ASR / TTS 接口 -->
+        <module>ai-voice-server</module>
+    </modules>
+
+</project>

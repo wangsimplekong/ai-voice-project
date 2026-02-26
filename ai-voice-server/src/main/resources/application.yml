@@ -1,0 +1,44 @@
+server:
+  port: ${SERVER_PORT:28085}
+
+spring:
+  application:
+    name: ai-voice-service
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+# ===== 语音引擎配置 =====
+# local.enabled=true  → 使用自部署 GPU 服务器 (Qwen3-ASR / Qwen3-TTS)
+# local.enabled=false → 使用百炼 DashScope 云 API (默认)
+ai:
+  voice:
+    # --- 本地自部署模式（设 enabled: true 切换） ---
+    local:
+      enabled: ${VOICE_LOCAL_ENABLED:true}
+      asr-url: ${VOICE_ASR_URL:http://192.168.100.180:8003}
+      asr-realtime-url: ${VOICE_ASR_RT_URL:ws://192.168.100.180:8005}
+      tts-url: ${VOICE_TTS_URL:http://192.168.100.180:8004}
+      # 可用说话人: aiden, dylan, eric, ono_anna, ryan, serena, sohee, uncle_fu, vivian
+      tts-voice: ${VOICE_TTS_VOICE:vivian}
+      tts-language: Auto
+      tts-format: mp3
+      timeout-ms: 30000
+      ws-connect-timeout-ms: 5000
+
+    # --- 百炼 DashScope 云 API 模式（默认）---
+    dashscope:
+      api-key: ${DASHSCOPE_API_KEY:}
+      region: ${DASHSCOPE_REGION:cn-beijing}
+      asr:
+        model: fun-asr-realtime
+        sample-rate: 16000
+        language: zh
+      asr-file:
+        model: fun-asr-realtime
+      tts:
+        model: cosyvoice-v3-flash
+        voice: longanyang
+      llm:
+        model: qwen-turbo
