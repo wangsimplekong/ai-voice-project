@@ -9,18 +9,31 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
 
+# ===== 接口文档 Knife4j / SpringDoc =====
+# 文档页：http://localhost:28085/doc.html  接口 JSON：/v3/api-docs
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
 # ===== 语音引擎配置 =====
-# local.enabled=true  → 使用自部署 GPU 服务器 (Qwen3-ASR / Qwen3-TTS)
+# local.enabled=true  → 使用自部署 GPU 服务器 Qwen/Qwen3-ASR-1.7B / Qwen3-TTS)
 # local.enabled=false → 使用百炼 DashScope 云 API (默认)
 ai:
   voice:
     # --- 本地自部署模式（设 enabled: true 切换） ---
     local:
       enabled: ${VOICE_LOCAL_ENABLED:true}
-      asr-url: ${VOICE_ASR_URL:http://192.168.100.180:8003}
-      asr-realtime-url: ${VOICE_ASR_RT_URL:ws://192.168.100.180:8005}
-      tts-url: ${VOICE_TTS_URL:http://192.168.100.180:8004}
-      # 可用说话人: aiden, dylan, eric, ono_anna, ryan, serena, sohee, uncle_fu, vivian
+      asr-url: ${VOICE_ASR_URL:http://172.20.128.11:8003}
+      asr-file-model: ${VOICE_ASR_FILE_MODEL:Qwen/Qwen3-ASR-1.7B}
+      asr-realtime-url: ${VOICE_ASR_RT_URL:ws://172.20.128.11:8005}
+      tts-url: ${VOICE_TTS_URL:http://172.20.128.11:8004}
+      # 可用说话人: aiden, dylan, eric, ono_anna, ryan, serena, sohee, uncle_fu, vivian（与 ai-voice-model/tts_server 一致）
       tts-voice: ${VOICE_TTS_VOICE:vivian}
       tts-language: Auto
       tts-format: mp3
@@ -42,3 +55,12 @@ ai:
         voice: longanyang
       llm:
         model: qwen-turbo
+
+    # --- ASR 文本纠错（LLM 纠错用系统提示词，可被 Nacos 覆盖）---
+    text-correction:
+      system-prompt: |
+        你是一个语音识别文本纠错助手。用户发来的文本是语音识别（ASR）的原始输出，可能存在错别字、同音字替换、语序不通顺等问题。
+        请你完成以下任务：
+        1. 修正明显的识别错误（错别字、同音字、漏字、多字）
+        2. 保持用户的原始意图，不要添加、删除或改变用户表达的核心信息
+        3. 只输出纠错后的文本，不要输出任何解释

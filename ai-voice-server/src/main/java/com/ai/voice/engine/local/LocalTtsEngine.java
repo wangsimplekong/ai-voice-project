@@ -1,6 +1,7 @@
 package com.ai.voice.engine.local;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.ai.voice.config.LocalVoiceProperties;
 import com.ai.voice.engine.ITtsEngine;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -83,9 +85,34 @@ public class LocalTtsEngine implements ITtsEngine {
 
             log.warn("TTS 合成返回非 200: {}", resp.getStatusCode());
             return null;
+        } catch (HttpClientErrorException e) {
+            String body = e.getResponseBodyAsString();
+            String msg = parseTtsErrorBody(body, StringUtils.hasText(voice) ? voice : props.getTtsVoice(), e.getStatusCode().value());
+            log.error("本地 TTS 合成失败: {}", msg);
+            return null;
         } catch (Exception e) {
             log.error("本地 TTS 合成失败: {}", e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * 解析 TTS 错误响应，输出可读提示（如音色不支持）
+     */
+    private String parseTtsErrorBody(String body, String requestedVoice, int statusCode) {
+        if (body == null || body.isEmpty()) {
+            return statusCode + " 请求失败";
+        }
+        try {
+            JSONObject json = JSON.parseObject(body);
+            String detail = json.getString("detail");
+            if (detail != null && detail.contains("Unsupported speakers") && detail.contains("Supported:")) {
+                return String.format("当前音色 [%s] 不被本地 TTS 支持。请在配置中设置 ai.voice.local.tts-voice 或在请求中传入支持的音色之一。支持的音色: %s", requestedVoice, detail.substring(detail.indexOf("Supported:")));
+            }
+            if (detail != null) {
+                return "本地 TTS 请求失败: " + detail;
+            }
+        } catch (Exception ignored) { }
+        return statusCode + " " + body;
     }
 }

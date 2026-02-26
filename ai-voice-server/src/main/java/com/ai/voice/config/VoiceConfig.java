@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties({DashScopeProperties.class, LocalVoiceProperties.class})
+@EnableConfigurationProperties({DashScopeProperties.class, LocalVoiceProperties.class, TextCorrectionProperties.class})
 public class VoiceConfig {
 
     private final DashScopeProperties dashScopeProps;

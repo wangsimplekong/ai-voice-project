@@ -6,6 +6,7 @@ import com.alibaba.dashscope.aigc.generation.GenerationResult;
 import com.alibaba.dashscope.common.Message;
 import com.alibaba.dashscope.common.Role;
 import com.ai.voice.config.DashScopeProperties;
+import com.ai.voice.config.TextCorrectionProperties;
 import com.ai.voice.service.ITextCorrectionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TextCorrectionServiceImpl implements ITextCorrectionService {
 
-    private static final String SYSTEM_PROMPT = """
+    private static final String DEFAULT_SYSTEM_PROMPT = """
             你是一个语音识别文本纠错助手。用户发来的文本是语音识别（ASR）的原始输出，可能存在错别字、同音字替换、语序不通顺等问题。
             请你完成以下任务：
             1. 修正明显的识别错误（错别字、同音字、漏字、多字）
@@ -30,6 +31,7 @@ public class TextCorrectionServiceImpl implements ITextCorrectionService {
             3. 只输出纠错后的文本，不要输出任何解释""";
 
     private final DashScopeProperties props;
+    private final TextCorrectionProperties textCorrectionProps;
 
     /**
      * 使用配置的 LLM 对 ASR 原始文本纠错，API Key 未配置或调用失败时返回原文
@@ -50,8 +52,10 @@ public class TextCorrectionServiceImpl implements ITextCorrectionService {
         }
 
         // 3. 构建 LLM 请求并调用
+        String systemPrompt = StringUtils.hasText(textCorrectionProps.getSystemPrompt())
+                ? textCorrectionProps.getSystemPrompt() : DEFAULT_SYSTEM_PROMPT;
         try {
-            Message sys = Message.builder().role(Role.SYSTEM.getValue()).content(SYSTEM_PROMPT).build();
+            Message sys = Message.builder().role(Role.SYSTEM.getValue()).content(systemPrompt).build();
             Message user = Message.builder().role(Role.USER.getValue()).content(rawText).build();
             GenerationParam param = GenerationParam.builder()
                     .apiKey(apiKey)

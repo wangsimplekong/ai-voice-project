@@ -14,6 +14,6 @@ public class TtsSynthesizeDTO {
     @Schema(description = "待合成文本", example = "你好，今天天气怎么样？", requiredMode = Schema.RequiredMode.REQUIRED)
     private String text;
 
-    @Schema(description = "音色，不传则使用服务默认", example = "longanyang")
+    @Schema(description = "音色，不传则使用服务默认 本地模型支持：'aiden', 'dylan', 'eric', 'ono_anna', 'ryan', 'serena', 'sohee', 'uncle_fu', 'vivian'", example = "vivian")
     private String voice;
 }

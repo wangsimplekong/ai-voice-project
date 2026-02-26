@@ -22,6 +22,11 @@ public class LocalVoiceProperties {
     private String asrUrl = "http://localhost:8003";
 
     /**
+     * 文件 ASR 请求中的 model 参数，需与 qwen-asr-serve 侧一致（如 qwen3-asr 或服务要求的标识）
+     */
+    private String asrFileModel = "qwen3-asr";
+
+    /**
      * asr_realtime_server.py WebSocket 地址 (实时流式 ASR)
      */
     private String asrRealtimeUrl = "ws://localhost:8005";

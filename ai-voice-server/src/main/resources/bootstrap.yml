@@ -1,0 +1,15 @@
+# 可选 Nacos 配置中心：未配置则不连接，配置后可从 Nacos 动态刷新（如纠错提示词等）
+# 启用方式：设置环境变量 NACOS_ENABLED=true 且 NACOS_SERVER_ADDR=host:8848
+# 不设置或 NACOS_ENABLED=false 时，不会连接 Nacos，仅使用本地 application.yml
+spring:
+  application:
+    name: ai-voice-service
+  cloud:
+    nacos:
+      config:
+        enabled: ${NACOS_ENABLED:false}
+        server-addr: ${NACOS_SERVER_ADDR:}
+        file-extension: yml
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        namespace: ${NACOS_NAMESPACE:}
+        refresh-enabled: true
