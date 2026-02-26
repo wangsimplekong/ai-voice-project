@@ -1,5 +1,6 @@
 package com.ai.voice.service.impl;
 
+import com.ai.voice.newapi.NewApiChatUtils;
 import com.alibaba.dashscope.aigc.generation.Generation;
 import com.alibaba.dashscope.aigc.generation.GenerationParam;
 import com.alibaba.dashscope.aigc.generation.GenerationResult;
@@ -32,7 +33,7 @@ public class TextCorrectionServiceImpl implements ITextCorrectionService {
 
     private final DashScopeProperties props;
     private final TextCorrectionProperties textCorrectionProps;
-
+    private final NewApiChatUtils newApiChatUtils;
     /**
      * 使用配置的 LLM 对 ASR 原始文本纠错，API Key 未配置或调用失败时返回原文
      *
@@ -44,28 +45,11 @@ public class TextCorrectionServiceImpl implements ITextCorrectionService {
         // 1. 校验入参
         if (!StringUtils.hasText(rawText)) return rawText;
 
-        // 2. 检查 API Key 是否配置
-        String apiKey = props.getApiKey();
-        if (!StringUtils.hasText(apiKey)) {
-            log.warn("LLM 纠错: api-key 未配置，跳过纠错");
-            return rawText;
-        }
-
-        // 3. 构建 LLM 请求并调用
+        // 2. 构建 LLM 请求并调用
         String systemPrompt = StringUtils.hasText(textCorrectionProps.getSystemPrompt())
                 ? textCorrectionProps.getSystemPrompt() : DEFAULT_SYSTEM_PROMPT;
         try {
-            Message sys = Message.builder().role(Role.SYSTEM.getValue()).content(systemPrompt).build();
-            Message user = Message.builder().role(Role.USER.getValue()).content(rawText).build();
-            GenerationParam param = GenerationParam.builder()
-                    .apiKey(apiKey)
-                    .model(props.getLlm().getModel())
-                    .messages(List.of(sys, user))
-                    .build();
-            GenerationResult result = new Generation().call(param);
-
-            // 4. 提取纠错结果
-            String corrected = result.getOutput().getChoices().get(0).getMessage().getContent();
+             String corrected = newApiChatUtils.chat(props.getLlm().getModel(), systemPrompt, rawText);
             return StringUtils.hasText(corrected) ? corrected.trim() : rawText;
         } catch (Exception e) {
             log.warn("LLM 纠错失败，返回原文: {}", e.getMessage());
